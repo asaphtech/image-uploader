@@ -4,8 +4,8 @@ require('dotenv').config(); // Membaca kredensial dari .env
 const express = require('express');
 const cloudinary = require('cloudinary').v2;
 const multer = require('multer'); 
+const cors = require('cors'); // <-- TAMBAHKAN INI
 const app = express();
-const port = 3000;
 
 // Konfigurasi Cloudinary
 cloudinary.config({
@@ -59,5 +59,5 @@ app.post('/upload', upload.single('image'), async (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`Server berjalan di http://localhost:${port}`);
+  console.log(`Server berjalan di http://localhost:${port}`);
 });
