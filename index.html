@@ -3,138 +3,259 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image to Link App (Drag & Drop)</title>
+    <title>LinkGen: Futuristic Image Uploader</title>
+
     <style>
-        /* Gaya dasar untuk area drop */
-        #drop-area {
-            border: 2px dashed #ccc;
-            border-radius: 20px;
-            width: 400px;
-            padding: 20px;
+        @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Roboto Mono', monospace;
+            background: #0d1117;
+            color: #00ff99;
+            margin: 0;
+            padding-top: 60px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            width: 92%;
+            max-width: 600px;
+            background: #161b22;
+            padding: 32px;
+            border-radius: 14px;
+            border: 1px solid #00ff9933;
+            box-shadow: 0 0 20px #00ff9922;
+            backdrop-filter: blur(6px);
+            animation: fadeIn 0.6s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
             text-align: center;
-            font: 20pt bold;
-            color: #bbb;
-            margin: 20px 0;
+            margin-bottom: 25px;
+            font-size: 22px;
+            color: #ffffff;
+            text-shadow: 0 0 6px #00ff99;
+        }
+
+        /* AREA DROP */
+        #drop-area {
+            border: 2px dashed #00ff99;
+            padding: 45px 20px;
+            border-radius: 10px;
+            text-align: center;
             cursor: pointer;
+            color: #aaffdd;
+            transition: 0.25s;
         }
-        /* Gaya saat file diseret di atas area */
+
+        #drop-area:hover {
+            border-color: #00ffaa;
+            box-shadow: 0 0 10px #00ffaa66;
+        }
+
         #drop-area.highlight {
-            border-color: #333;
-            background-color: #f0f0f0;
+            background: #00ff9922;
+            box-shadow: 0 0 16px #00ff99;
         }
-        .file-input-container {
-            margin-top: 10px;
-            font-size: 14px;
-            color: #555;
+
+        .action-text {
+            color: #c8ffe8;
+            margin-top: 20px;
+            line-height: 1.6;
         }
+        .action-text span {
+            color: #00ffcc;
+            font-weight: bold;
+        }
+
+        #imageFile { display: none; }
+
+        /* RESULT BOX */
+        #result {
+            margin-top: 30px;
+            text-align: center;
+            border-top: 1px solid #00ff9944;
+            padding-top: 20px;
+        }
+
+        #loading {
+            display: none;
+            color: #ffaa00;
+            font-size: 1.1em;
+            text-shadow: 0 0 6px #ffaa00aa;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.5; }
+            50% { opacity: 1; }
+            100% { opacity: 0.5; }
+        }
+
+        /* URL DISPLAY */
+        #urlDisplay a {
+            color: #ff66ff;
+            word-break: break-all;
+            font-size: 15px;
+        }
+
+        /* BUTTON */
+        .copy-button {
+            margin-top: 15px;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            background: #00ff99;
+            color: #1a1f26;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .copy-button:hover {
+            background: #ffffff;
+            box-shadow: 0 0 10px #00ff99;
+        }
+
+        .footer {
+            margin-top: 50px;
+            color: #777;
+            font-size: 0.8em;
+        }
+
     </style>
 </head>
 <body>
-    <h1>Upload Gambar & Dapatkan Tautan</h1>
 
-    <div id="drop-area">
-        <p>Seret & Lepas Gambar di Sini</p>
-        <div class="file-input-container">
-             — ATAU —
-            <br>
-            <input type="file" id="imageFile" name="image" accept="image/*" required>
+    <div class="container">
+        <h1>LINKGEN — IMAGE UPLOADER</h1>
+
+        <div id="drop-area">
+            <p>Seret & lepaskan gambar di sini</p>
+            <div class="action-text">
+                — atau — <br>
+                Klik untuk <span>Memilih File</span> <br>
+                — atau — <br>
+                Tekan <span>Ctrl + V</span> untuk <span>Paste Gambar</span>
+            </div>
+
+            <input type="file" id="imageFile" accept="image/*">
+        </div>
+
+        <div id="result">
+            <p id="loading">[.. MENGUNGGAH DATA HOLOGRAFIK ..]</p>
+            <div id="urlDisplay"></div>
         </div>
     </div>
-    
-    <div id="result" style="margin-top: 20px;">
-        <p id="loading" style="display:none; color: orange;">Mengunggah...</p>
-        <p id="urlDisplay"></p>
-    </div>
 
-    <script>
-        const dropArea = document.getElementById('drop-area');
-        const fileInput = document.getElementById('imageFile');
-        const urlDisplay = document.getElementById('urlDisplay');
-        const loading = document.getElementById('loading');
-        
-        const API_URL = 'https://image-uploader-i0b0.onrender.com'; 
+    <div class="footer">Powered by Render & Netlify</div>
 
-        // Fungsi Inti untuk Mengunggah File
-        async function uploadFile(file) {
-            urlDisplay.innerHTML = '';
-            loading.style.display = 'block'; 
+<script>
+    const dropArea = document.getElementById('drop-area');
+    const fileInput = document.getElementById('imageFile');
+    const urlDisplay = document.getElementById('urlDisplay');
+    const loading = document.getElementById('loading');
 
-            const formData = new FormData();
-            // Kunci harus 'image' sesuai dengan Back-end server.js: upload.single('image')
-            formData.append('image', file);
+    // GANTI URL INI DENGAN URL BACKEND RENDER YANG AKTIF
+    const API_URL = "https://image-uploader-i0b0.onrender.com/upload";
 
-            try {
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    body: formData, 
-                });
 
-                const data = await response.json();
+    /* ----------------------------- 
+       FUNGSI UPLOAD
+    ------------------------------*/
+    async function uploadFile(file) {
+        urlDisplay.innerHTML = "";
+        loading.style.display = "block";
 
-                if (response.ok) {
-                    urlDisplay.innerHTML = `
-                        <p style="color: green; font-weight: bold;">Unggahan Berhasil! Link Publik Anda:</p>
-                        <a href="${data.url}" target="_blank">${data.url}</a>
-                        <br>
-                        <button onclick="navigator.clipboard.writeText('${data.url}')">Salin Tautan</button>
-                    `;
-                } else {
-                    urlDisplay.innerHTML = `<p style="color: red;">Gagal: ${data.message || 'Kesalahan server.'}</p>`;
-                }
+        const formData = new FormData();
+        formData.append('image', file);
 
-            } catch (error) {
-                urlDisplay.innerHTML = `<p style="color: red;">Kesalahan Koneksi. Pastikan server.js berjalan!</p>`;
-            } finally {
-                loading.style.display = 'none'; 
+        try {
+            const res = await fetch(API_URL, { method: "POST", body: formData });
+            const data = await res.json();
+
+            if (res.ok) {
+                urlDisplay.innerHTML = `
+                    <p style="color:#00ffcc; font-weight:600;">[ BERHASIL ] Tautan Publik:</p>
+                    <a href="${data.url}" target="_blank">${data.url}</a>
+                    <br>
+                    <button class="copy-button" onclick="navigator.clipboard.writeText('${data.url}')">SALIN LINK</button>
+                `;
+            } else {
+                urlDisplay.innerHTML = `<p style="color:red;">[ GAGAL ] ${data.message}</p>`;
             }
-        }
-        
-        // --- Event Listener untuk Input File Normal ---
-        fileInput.addEventListener('change', (e) => {
-            if (e.target.files.length > 0) {
-                uploadFile(e.target.files[0]);
-            }
-        });
 
-        // --- Event Listener untuk Drag and Drop ---
-        
-        // Mencegah perilaku default browser saat menyeret file
-        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-            dropArea.addEventListener(eventName, preventDefaults, false);
-        });
-
-        function preventDefaults (e) {
-            e.preventDefault();
-            e.stopPropagation();
+        } catch (err) {
+            urlDisplay.innerHTML = `<p style="color:red;">[ ERROR ] Tidak dapat terhubung ke API Render!</p>`;
         }
 
-        // Menyorot area saat file diseret di atasnya
-        ['dragenter', 'dragover'].forEach(eventName => {
-            dropArea.addEventListener(eventName, () => dropArea.classList.add('highlight'), false);
-        });
+        loading.style.display = "none";
+    }
 
-        // Menghapus sorotan saat file keluar dari area
-        ['dragleave', 'drop'].forEach(eventName => {
-            dropArea.addEventListener(eventName, () => dropArea.classList.remove('highlight'), false);
-        });
 
-        // Event saat file dilepas di area
-        dropArea.addEventListener('drop', handleDrop, false);
+    /* ----------------------------- 
+       INPUT FILE NORMAL
+    ------------------------------*/
+    fileInput.addEventListener("change", e => {
+        if (e.target.files.length > 0) uploadFile(e.target.files[0]);
+    });
 
-        function handleDrop(e) {
-            let dt = e.dataTransfer;
-            let files = dt.files;
 
-            // Hanya proses file pertama (mengabaikan lebih dari satu file)
-            if (files.length > 0) {
-                // Pastikan itu adalah gambar (Opsional tapi disarankan)
-                if (files[0].type.startsWith('image/')) {
-                    uploadFile(files[0]);
-                } else {
-                    alert('Hanya file gambar yang diizinkan!');
-                }
+    /* ----------------------------- 
+       DRAG & DROP
+    ------------------------------*/
+    function prevent(e) {
+        e.preventDefault(); e.stopPropagation();
+    }
+
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(event =>
+        dropArea.addEventListener(event, prevent)
+    );
+
+    ['dragenter', 'dragover'].forEach(event =>
+        dropArea.addEventListener(event, () => dropArea.classList.add("highlight"))
+    );
+
+    ['dragleave', 'drop'].forEach(event =>
+        dropArea.addEventListener(event, () => dropArea.classList.remove("highlight"))
+    );
+
+    dropArea.addEventListener("drop", e => {
+        let files = e.dataTransfer.files;
+        if (files.length > 0 && files[0].type.startsWith("image/")) {
+            uploadFile(files[0]);
+        } else {
+            alert("Hanya file gambar yang diizinkan.");
+        }
+    });
+
+    dropArea.addEventListener("click", () => fileInput.click());
+
+
+    /* ----------------------------- 
+       PASTE GAMBAR (CTRL + V)
+    ------------------------------*/
+    document.addEventListener("paste", e => {
+        if (!e.clipboardData) return;
+
+        for (let item of e.clipboardData.items) {
+            if (item.type.indexOf("image") !== -1) {
+                e.preventDefault();
+                let file = item.getAsFile();
+                file.name = "pasted-" + Date.now() + ".png";
+                uploadFile(file);
+                return;
             }
         }
-    </script>
+    });
+
+</script>
+
 </body>
 </html>
